@@ -554,3 +554,16 @@ void EscapeShell(string* s) {
   StringPiece(*s).substr(prev).AppendToString(&r);
   s->swap(r);
 }
+
+bool IsNumeric(StringPiece s) {
+  if (s.size() == 0) {
+    return false;
+  }
+  for (auto c: s) {
+    if (c < '0' || c > '9') {
+      return false;
+    }
+  }
+  return true;
+}
+

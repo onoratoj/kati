@@ -41,6 +41,8 @@ static vector<SymbolData> g_symbol_data;
 Symbol kEmptySym;
 Symbol kShellSym;
 Symbol kKatiReadonlySym;
+Symbol kKatiAllSymbols;
+Symbol kKatiSymbols;
 
 Symbol::Symbol(int v) : v_(v) {}
 
@@ -127,6 +129,14 @@ class Symtab {
     kEmptySym = Intern("");
     kShellSym = Intern("SHELL");
     kKatiReadonlySym = Intern(".KATI_READONLY");
+    kKatiAllSymbols = Intern(".KATI_ALL_SYMBOLS");
+    kKatiAllSymbols.SetGlobalVar(
+        new KatiVariableNamesVar(".KATI_ALL_SYMBOLS", true),
+        false, nullptr);
+    kKatiSymbols = Intern(".KATI_SYMBOLS");
+    kKatiSymbols.SetGlobalVar(
+        new KatiVariableNamesVar(".KATI_SYMBOLS", false),
+        false, nullptr);
   }
 
   ~Symtab() {
@@ -159,6 +169,23 @@ class Symtab {
     return InternImpl(s);
   }
 
+  vector<StringPiece> GetSymbolNames(std::function<bool(Var*)> const& filter) {
+    vector<StringPiece> result;
+    for (auto entry : symtab_) {
+      Var* var = entry.second.PeekGlobalVar();
+      // The symbol table contains all interned strings, not just variables
+      // which have been defined.
+      if (!var->IsDefined()) {
+        continue;
+      }
+      if (filter(var)) {
+        result.push_back(entry.first);
+      }
+    }
+    return result;
+  }
+
+
  private:
   unordered_map<StringPiece, Symbol> symtab_;
   vector<string*> symbols_;
@@ -188,3 +215,8 @@ string JoinSymbols(const vector<Symbol>& syms, const char* sep) {
   }
   return JoinStrings(strs, sep);
 }
+
+vector<StringPiece> GetSymbolNames(std::function<bool(Var*)> const& filter) {
+  return g_symtab->GetSymbolNames(filter);
+}
+

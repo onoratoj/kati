@@ -210,6 +210,16 @@ void TestConcatDir() {
   ASSERT_EQ(ConcatDir("a", "../../b"), "../b");
 }
 
+void TestIsNumeric() {
+  ASSERT_BOOL(IsNumeric("0"), true);
+  ASSERT_BOOL(IsNumeric("9"), true);
+  ASSERT_BOOL(IsNumeric("1234"), true);
+  ASSERT_BOOL(IsNumeric(""), false);
+  ASSERT_BOOL(IsNumeric("a234"), false);
+  ASSERT_BOOL(IsNumeric("123a"), false);
+  ASSERT_BOOL(IsNumeric("12a4"), false);
+}
+
 }  // namespace
 
 int main() {
@@ -227,5 +237,6 @@ int main() {
   TestWordScannerInvalidAccess();
   TestFindEndOfLineInvalidAccess();
   TestConcatDir();
+  TestIsNumeric();
   assert(!g_failed);
 }
